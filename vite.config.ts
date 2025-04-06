@@ -14,7 +14,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, 'src/main.ts'),
       name: 'H9VueRecipes',
       fileName: (format) => `h9-vue-recipes.${format}.js`,
       formats: ['es', 'umd'],
