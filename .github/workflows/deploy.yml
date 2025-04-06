@@ -39,6 +39,10 @@ jobs:
           aws configure set default.region auto
           aws configure set default.s3.endpoint_url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           aws configure set default.s3.signature_version s3v4
+          # 재시도 횟수 증가
+          aws configure set default.s3.max_attempts 10
+          # 타임아웃 설정
+          aws configure set default.s3.timeout 60
 
       # 6. Check Bucket Settings
       - name: Check Bucket Settings
@@ -52,7 +56,31 @@ jobs:
       # 7. R2에 파일 업로드
       - name: Upload to R2
         run: |
-          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 sync dist/ s3://h9-vue-recipes-assets/ --delete
+          # dist 디렉토리 내용 확인
+          echo "Contents of dist directory:"
+          ls -la dist/
+
+          # 각 파일을 개별적으로 업로드
+          for file in dist/*; do
+            filename=$(basename "$file")
+            echo "Uploading $filename..."
+            echo "File size: $(ls -lh "$file" | awk '{print $5}')"
+            
+            # 최대 3번까지 재시도
+            for i in {1..3}; do
+              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --debug; then
+                echo "Successfully uploaded $filename"
+                break
+              else
+                echo "Attempt $i failed for $filename, retrying..."
+                if [ $i -eq 3 ]; then
+                  echo "Failed to upload $filename after 3 attempts"
+                  exit 1
+                fi
+                sleep 5
+              fi
+            done
+          done
 
       # 8. 업로드된 파일 URL 출력
       - name: Print File URLs
