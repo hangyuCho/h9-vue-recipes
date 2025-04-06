@@ -53,6 +53,9 @@ jobs:
           echo "Checking bucket policy..."
           aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api get-bucket-policy --bucket h9-vue-recipes-assets || true
 
+          echo "Setting bucket ACL to public-read..."
+          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api put-bucket-acl --bucket h9-vue-recipes-assets --acl public-read
+
       # 7. R2에 파일 업로드
       - name: Upload to R2
         run: |
@@ -68,7 +71,7 @@ jobs:
             
             # 최대 3번까지 재시도
             for i in {1..3}; do
-              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --debug; then
+              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --acl public-read --content-type $(file -b --mime-type "$file") --debug; then
                 echo "Successfully uploaded $filename"
                 break
               else
