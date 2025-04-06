@@ -31,72 +31,21 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 5. AWS CLI 설정 (R2는 S3 호환 API를 사용)
+      # 5. AWS CLI 설정
       - name: Configure AWS CLI
         run: |
-          # R2 액세스 키 설정
           aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          # R2는 region이 필요 없음
           aws configure set default.region auto
-          # R2 엔드포인트 설정
           aws configure set default.s3.endpoint_url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          # S3 v4 서명 사용
           aws configure set default.s3.signature_version s3v4
-          # 업로드 재시도 횟수 증가
-          aws configure set default.s3.max_attempts 10
-          # 타임아웃 설정
-          aws configure set default.s3.timeout 60
 
-      # 6. R2 버킷 CORS 설정
-      - name: Configure R2 Bucket CORS
-        run: |
-          # 모든 도메인에서 접근 가능하도록 CORS 설정
-          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api put-bucket-cors \
-            --bucket h9-vue-recipes-assets \
-            --cors-configuration '{
-              "CORSRules": [
-                {
-                  "AllowedOrigins": ["*"],
-                  "AllowedMethods": ["GET", "HEAD"],
-                  "AllowedHeaders": ["*"],
-                  "ExposeHeaders": ["ETag"],
-                  "MaxAgeSeconds": 3000
-                }
-              ]
-            }'
-
-      # 7. R2에 파일 업로드
+      # 6. R2에 파일 업로드
       - name: Upload to R2
         run: |
-          # 버킷 존재 확인
-          if ! aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 ls s3://h9-vue-recipes-assets/ 2>/dev/null; then
-            echo "Creating bucket h9-vue-recipes-assets..."
-            aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 mb s3://h9-vue-recipes-assets
-          fi
+          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 sync dist/ s3://h9-vue-recipes-assets/ --delete
 
-          # 각 파일을 개별적으로 업로드
-          for file in dist/*; do
-            filename=$(basename "$file")
-            echo "Uploading $filename..."
-            
-            # 최대 3번까지 재시도
-            for i in {1..3}; do
-              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --no-progress; then
-                echo "Successfully uploaded $filename"
-                break
-              else
-                echo "Attempt $i failed for $filename, retrying..."
-                if [ $i -eq 3 ]; then
-                  echo "Failed to upload $filename after 3 attempts"
-                  exit 1
-                fi
-                sleep 5
-              fi
-            done
-          done
-
-      # 8. 업로드된 파일 URL 출력
+      # 7. 업로드된 파일 URL 출력
       - name: Print File URLs
         run: |
           echo "Uploaded files are available at:"
