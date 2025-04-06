@@ -69,11 +69,31 @@ jobs:
       # 7. R2에 파일 업로드
       - name: Upload to R2
         run: |
+          # 버킷 존재 확인
+          if ! aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 ls s3://h9-vue-recipes-assets/ 2>/dev/null; then
+            echo "Creating bucket h9-vue-recipes-assets..."
+            aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 mb s3://h9-vue-recipes-assets
+          fi
+
           # 각 파일을 개별적으로 업로드
           for file in dist/*; do
             filename=$(basename "$file")
             echo "Uploading $filename..."
-            aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --no-progress
+            
+            # 최대 3번까지 재시도
+            for i in {1..3}; do
+              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --no-progress; then
+                echo "Successfully uploaded $filename"
+                break
+              else
+                echo "Attempt $i failed for $filename, retrying..."
+                if [ $i -eq 3 ]; then
+                  echo "Failed to upload $filename after 3 attempts"
+                  exit 1
+                fi
+                sleep 5
+              fi
+            done
           done
 
       # 8. 업로드된 파일 URL 출력
