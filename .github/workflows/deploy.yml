@@ -38,51 +38,25 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
           aws configure set default.region auto
           aws configure set default.s3.endpoint_url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          aws configure set default.s3.signature_version s3v4
-          # 재시도 횟수 증가
-          aws configure set default.s3.max_attempts 10
-          # 타임아웃 설정
-          aws configure set default.s3.timeout 60
 
-      # 6. Check Bucket Settings
-      - name: Check Bucket Settings
-        run: |
-          echo "Checking bucket existence..."
-          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api head-bucket --bucket h9-vue-recipes-assets || true
-
-      # 7. R2에 파일 업로드
+      # 6. R2에 파일 업로드
       - name: Upload to R2
         run: |
-          # dist 디렉토리 내용 확인
-          echo "Contents of dist directory:"
-          ls -la dist/
-
-          # 각 파일을 개별적으로 업로드
-          for file in dist/*; do
-            filename=$(basename "$file")
-            echo "Uploading $filename..."
-            echo "File size: $(ls -lh "$file" | awk '{print $5}')"
-            
-            # 최대 3번까지 재시도
-            for i in {1..3}; do
-              if aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --content-type $(file -b --mime-type "$file") --debug; then
-                echo "Successfully uploaded $filename"
-                break
-              else
-                echo "Attempt $i failed for $filename, retrying..."
-                if [ $i -eq 3 ]; then
-                  echo "Failed to upload $filename after 3 attempts"
-                  exit 1
-                fi
-                sleep 5
-              fi
-            done
+          echo "Uploading files to R2..."
+          cd dist
+          for file in *; do
+            echo "Uploading $file..."
+            aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+                s3 cp "$file" "s3://h9-vue-recipes-assets/$file" \
+                --content-type "$(file -b --mime-type "$file")" \
+                --no-progress
           done
 
-      # 8. 업로드된 파일 URL 출력
+      # 7. 업로드된 파일 URL 출력
       - name: Print File URLs
         run: |
           echo "Uploaded files are available at:"
-          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.es.js"
-          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.css"
-          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.umd.js" 
+          for file in dist/*; do
+            filename=$(basename "$file")
+            echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/$filename"
+          done 
