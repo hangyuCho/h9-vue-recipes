@@ -49,6 +49,6 @@ jobs:
       - name: Print File URLs
         run: |
           echo "Uploaded files are available at:"
-          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.es.js"
-          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.css"
-          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.umd.js" 
+          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.es.js"
+          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.css"
+          echo "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com/h9-vue-recipes-assets/h9-vue-recipes.umd.js" 
