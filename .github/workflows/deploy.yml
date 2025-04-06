@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Workers R2
 
 on:
   push:
@@ -20,11 +20,14 @@ jobs:
         
       - name: Build
         run: npm run build
-        
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: h9-vue-recipes
-          directory: dist 
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+          aws configure set default.s3.endpoint_url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+
+      - name: Upload to R2
+        run: |
+          aws s3 sync dist/ s3://h9-vue-recipes-assets/ --delete 
