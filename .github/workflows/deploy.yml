@@ -40,12 +40,21 @@ jobs:
           aws configure set default.s3.endpoint_url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           aws configure set default.s3.signature_version s3v4
 
-      # 6. R2에 파일 업로드
+      # 6. Check Bucket Settings
+      - name: Check Bucket Settings
+        run: |
+          echo "Checking bucket ACL..."
+          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api get-bucket-acl --bucket h9-vue-recipes-assets || true
+          
+          echo "Checking bucket policy..."
+          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api get-bucket-policy --bucket h9-vue-recipes-assets || true
+
+      # 7. R2에 파일 업로드
       - name: Upload to R2
         run: |
           aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 sync dist/ s3://h9-vue-recipes-assets/ --delete
 
-      # 7. 업로드된 파일 URL 출력
+      # 8. 업로드된 파일 URL 출력
       - name: Print File URLs
         run: |
           echo "Uploaded files are available at:"
