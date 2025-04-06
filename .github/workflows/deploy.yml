@@ -48,10 +48,38 @@ jobs:
           # 타임아웃 설정
           aws configure set default.s3.timeout 60
 
-      # 6. R2에 파일 업로드
+      # 6. R2 버킷 CORS 설정
+      - name: Configure R2 Bucket CORS
+        run: |
+          # 모든 도메인에서 접근 가능하도록 CORS 설정
+          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3api put-bucket-cors \
+            --bucket h9-vue-recipes-assets \
+            --cors-configuration '{
+              "CORSRules": [
+                {
+                  "AllowedOrigins": ["*"],
+                  "AllowedMethods": ["GET", "HEAD"],
+                  "AllowedHeaders": ["*"],
+                  "ExposeHeaders": ["ETag"],
+                  "MaxAgeSeconds": 3000
+                }
+              ]
+            }'
+
+      # 7. R2에 파일 업로드
       - name: Upload to R2
         run: |
-          # dist 폴더의 내용을 R2 버킷에 동기화
-          # --delete: 버킷에 있지만 로컬에 없는 파일 삭제
-          # --no-progress: 진행 상황 표시 비활성화
-          aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 sync dist/ s3://h9-vue-recipes-assets/ --delete --no-progress 
+          # 각 파일을 개별적으로 업로드
+          for file in dist/*; do
+            filename=$(basename "$file")
+            echo "Uploading $filename..."
+            aws --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com s3 cp "$file" "s3://h9-vue-recipes-assets/$filename" --no-progress
+          done
+
+      # 8. 업로드된 파일 URL 출력
+      - name: Print File URLs
+        run: |
+          echo "Uploaded files are available at:"
+          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.es.js"
+          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.css"
+          echo "https://pub-a354a02c209a41e5823ddbe8ead30d4e.r2.dev/h9-vue-recipes.umd.js" 
