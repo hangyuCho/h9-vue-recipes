@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Mini Profile</h1>
+    <h1>Mini Recipes</h1>
   </div>
 </template>
 
