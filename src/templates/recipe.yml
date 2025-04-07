@@ -1,0 +1,126 @@
+# 레시피 메타데이터
+frontmatter:
+  id: ${id}
+  name: ${title}
+  description: ${description}
+  difficulty: ${difficulty}
+  createdAt: ${createdAt}
+  updatedAt: ${updatedAt}
+  createdBy: ${createdBy}
+  isPublished: false
+
+# 레시피 설정
+settings:
+  dripper: ${dripper}
+  coffeeWeight: ${coffeeWeight}
+  waterAmount: ${waterAmount}
+  waterTemp: ${waterTemp}
+  grinder: ${grinder}
+
+# 추출 단계
+steps:
+  - time: ${steps[0].time}
+    water: ${steps[0].water}
+    total: ${steps[0].total}
+    description: ${steps[0].description}
+  - time: ${steps[1].time}
+    water: ${steps[1].water}
+    total: ${steps[1].total}
+    description: ${steps[1].description}
+  - time: ${steps[2].time}
+    water: ${steps[2].water}
+    total: ${steps[2].total}
+    description: ${steps[2].description}
+  - time: ${steps[3].time}
+    water: ${steps[3].water}
+    total: ${steps[3].total}
+    description: ${steps[3].description}
+  - time: ${steps[4].time}
+    water: ${steps[4].water}
+    total: ${steps[4].total}
+    description: ${steps[4].description}
+
+name: Coffee Recipe
+description: Create a new coffee recipe with metadata and brewing steps
+fields:
+  - name: title
+    type: input
+    message: What is the name of your coffee recipe?
+    default: My New Recipe
+
+  - name: description
+    type: input
+    message: Give a brief description of this recipe
+    default: A delicious coffee recipe
+
+  - name: difficulty
+    type: list
+    message: Select the difficulty level
+    choices:
+      - Easy
+      - Medium
+      - Hard
+
+  - name: dripper
+    type: input
+    message: What dripper is used?
+    default: Hario V60
+
+  - name: coffeeWeight
+    type: input
+    message: How many grams of coffee?
+    default: 30
+
+  - name: waterAmount
+    type: input
+    message: How many grams of water?
+    default: 500
+
+  - name: waterTemp
+    type: input
+    message: What is the water temperature?
+    default: 93
+
+  - name: grinder
+    type: input
+    message: What grinder is used?
+    default: Baratza Encore
+
+  - name: steps
+    type: input
+    message: How many brewing steps?
+    default: 5
+
+template: |
+  ---
+  id: {{id}}
+  name: {{title}}
+  description: {{description}}
+  difficulty: {{difficulty}}
+  createdAt: {{createdAt}}
+  updatedAt: {{updatedAt}}
+  createdBy: {{createdBy}}
+  isPublished: false
+  ---
+
+  # {{title}}
+
+  {{description}}
+
+  ## 설정
+
+  - 드리퍼: {{dripper}}
+  - 커피 무게: {{coffeeWeight}}g
+  - 물의 량: {{waterAmount}}g
+  - 물의 온도: {{waterTemp}}°C
+  - 그라인더: {{grinder}}
+
+  ## 추출 단계
+
+  {{#each steps}}
+  ### {{@index}}단계
+  - 시간: {{time}}초
+  - 물: {{water}}g
+  - 총량: {{total}}g
+  - 설명: {{description}}
+  {{/each}}

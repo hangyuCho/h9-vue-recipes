@@ -1,0 +1,84 @@
+name: Coffee Recipe
+description: Create a new coffee recipe with metadata and brewing steps
+fields:
+  - name: title
+    type: input
+    message: コーヒーレシピの名前は何ですか？
+    default: 新しいレシピ
+
+  - name: description
+    type: input
+    message: このレシピについて簡単に説明してください
+    default: おいしいコーヒーレシピです
+
+  - name: difficulty
+    type: list
+    message: 難易度を選択してください
+    choices:
+      - 簡単
+      - 普通
+      - 難しい
+
+  - name: dripper
+    type: input
+    message: どのドリッパーを使用しますか？
+    default: Hario V60
+
+  - name: coffeeWeight
+    type: input
+    message: コーヒーは何グラム使用しますか？
+    default: 30
+
+  - name: waterAmount
+    type: input
+    message: 水は何グラム使用しますか？
+    default: 500
+
+  - name: waterTemp
+    type: input
+    message: お湯の温度は何度ですか？
+    default: 93
+
+  - name: grinder
+    type: input
+    message: どのグラインダーを使用しますか？
+    default: Baratza Encore
+
+  - name: steps
+    type: input
+    message: 抽出ステップは何段階ですか？
+    default: 5
+
+template: |
+  ---
+  id: {{id}}
+  name: {{title}}
+  description: {{description}}
+  difficulty: {{difficulty}}
+  createdAt: {{createdAt}}
+  updatedAt: {{updatedAt}}
+  createdBy: {{createdBy}}
+  isPublished: false
+  ---
+
+  # {{title}}
+
+  {{description}}
+
+  ## 設定
+
+  - ドリッパー: {{dripper}}
+  - コーヒー量: {{coffeeWeight}}g
+  - 水量: {{waterAmount}}g
+  - 水温: {{waterTemp}}°C
+  - グラインダー: {{grinder}}
+
+  ## 抽出ステップ
+
+  {{#each steps}}
+  ### ステップ{{@index}}
+  - 時間: {{time}}秒
+  - 水量: {{water}}g
+  - 合計: {{total}}g
+  - 説明: {{description}}
+  {{/each}}
