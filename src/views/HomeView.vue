@@ -83,6 +83,16 @@ const MiniRecipesPageName = 'MiniRecipesPage'
 const pages = [MiniHomePageName, MiniProfilePageName, MiniRecipesPageName]
 const currentPage = ref(pages[0])
 
+const props = defineProps<{
+  getAccessToken: () => Promise<string>
+}>()
+
+const accessToken = ref('')
+
+props.getAccessToken().then((token) => {
+  accessToken.value = token
+})
+
 </script>
 
 <style scoped>

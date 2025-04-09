@@ -3,6 +3,7 @@ import { resolve } from 'path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import dts from 'vite-plugin-dts'
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
@@ -17,6 +18,11 @@ export default defineConfig(({ command }) => ({
         }
       },
       customElement: command === 'build'
+    }),
+    dts({
+      include: ['src/**/*.ts', 'src/**/*.vue'],
+      outputDir: 'dist/types',
+      tsConfigFilePath: 'tsconfig.json'
     })
   ],
   resolve: {
@@ -34,6 +40,7 @@ export default defineConfig(({ command }) => ({
     },
     cssCodeSplit: false,
     rollupOptions: {
+      external: ['vue'],
       output: {
         globals: {
           vue: 'Vue'
