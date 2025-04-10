@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,8 +23,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
+      - name: Install wrangler
+        run: pnpm add -g wrangler
+
+      - name: Build
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages
-        run: pnpm wrangler pages deploy dist --project-name h9-vue-recipes-cdn
+        run: wrangler pages deploy dist --project-name h9-vue-recipes-cdn
