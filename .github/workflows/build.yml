@@ -3,10 +3,14 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:  # 수동 실행 허용!
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
     steps:
       - name: Checkout code
