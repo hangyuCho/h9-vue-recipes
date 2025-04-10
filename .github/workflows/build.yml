@@ -2,15 +2,15 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,8 +23,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: Build project
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages
-        run: wrangler pages deploy dist --project-name h9-vue-recipes-cdn
+        run: pnpm exec wrangler pages deploy dist --project-name h9-vue-recipes-cdn
