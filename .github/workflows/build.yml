@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install wrangler
-        run: pnpm add -g wrangler
-
       - name: Build
         run: pnpm build
 
